@@ -26,8 +26,8 @@ func (s *ShopServer) GetItem(ctx context.Context, in *pb.ItemId) (*pb.Item, erro
 	return &item, nil
 }
 
-func (srv *ShopServer) Run() {
-	lis, err := net.Listen("tcp", ":8000")
+func (srv *ShopServer) Run(port string) {
+	lis, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Fatalf("failed to create listener: %s", err)
 	}

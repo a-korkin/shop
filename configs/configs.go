@@ -18,6 +18,14 @@ func getEnv(key string) string {
 	return value
 }
 
+func GetDBConnection() string {
+	return getEnv("DB_CONN")
+}
+
 func GetWebApiPort() string {
 	return getEnv("WEB_API_PORT")
+}
+
+func GetGrpcPort() string {
+	return getEnv("GRPC_PORT")
 }
