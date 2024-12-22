@@ -19,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ShopService_GetItem_FullMethodName = "/common.ShopService/GetItem"
+	ShopService_GetItem_FullMethodName = "/ShopService/GetItem"
 )
 
 // ShopServiceClient is the client API for ShopService service.
@@ -108,7 +108,7 @@ func _ShopService_GetItem_Handler(srv interface{}, ctx context.Context, dec func
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ShopService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "common.ShopService",
+	ServiceName: "ShopService",
 	HandlerType: (*ShopServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

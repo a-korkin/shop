@@ -1,7 +1,5 @@
 syntax = "proto3";
 
-package common;
-
 option go_package = "github.com/a-korkin/shop/common";
 
 message ItemId {
