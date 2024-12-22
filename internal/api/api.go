@@ -8,9 +8,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("hello from api"))
 }
 
-func Run() {
+func Run(port string) {
 	server := http.Server{
-		Addr: ":8080",
+		Addr: port,
 	}
 	http.HandleFunc("/", handler)
 	server.ListenAndServe()
