@@ -6,12 +6,14 @@ import (
 
 type AppState struct {
 	DbConn   ports.DbConnect
+	ApiPort  string
 	GrpcPort string
 }
 
-func NewAppState(dbConn ports.DbConnect, port string) *AppState {
-	return &AppState{
+func NewAppState(dbConn ports.DbConnect, apiPort string, grpcPort string) AppState {
+	return AppState{
 		DbConn:   dbConn,
-		GrpcPort: port,
+		ApiPort:  apiPort,
+		GrpcPort: grpcPort,
 	}
 }

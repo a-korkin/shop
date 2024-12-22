@@ -2,28 +2,28 @@ package rpc
 
 import (
 	"context"
-	pb "github.com/a-korkin/shop/internal/common"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
+
+	pb "github.com/a-korkin/shop/internal/common"
+	"github.com/a-korkin/shop/internal/core"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 type ShopServer struct {
 	pb.UnimplementedShopServiceServer
+	AppState *core.AppState
 }
 
-func NewShopServer() *ShopServer {
-	return &ShopServer{}
+func NewShopServer(appState *core.AppState) *ShopServer {
+	return &ShopServer{
+		AppState: appState,
+	}
 }
 
 func (s *ShopServer) GetItem(ctx context.Context, in *pb.ItemId) (*pb.Item, error) {
-	item := pb.Item{
-		Id:    1,
-		Title: "Item #1",
-		Price: 779.33,
-	}
-	return &item, nil
+	return s.AppState.DbConn.GetItem(in.Id)
 }
 
 func (srv *ShopServer) Run(port string) {

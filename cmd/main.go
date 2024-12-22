@@ -20,7 +20,23 @@ func help() {
 `)
 }
 
-func runWebApi() {
+func runWebApi(appState *core.AppState) {
+	log.Printf("web api running on port: %s", appState.ApiPort)
+	api.Run(appState)
+}
+
+func runGrpcServer(appState *core.AppState) {
+	server := rpc.NewShopServer(appState)
+	log.Printf("grpc server running on port: %s", appState.GrpcPort)
+	server.Run(appState.GrpcPort)
+}
+
+func main() {
+	if len(os.Args) == 1 || len(os.Args) > 2 {
+		fmt.Printf("You must choice which app to run. See help.\n")
+		help()
+		os.Exit(1)
+	}
 	dbConn, err := adapters.NewDBConnect(configs.GetDBConnection())
 	if err != nil {
 		log.Fatalf("failed to create connection to db: %s", err)
@@ -30,34 +46,19 @@ func runWebApi() {
 			log.Fatalf("failed to close connection to db: %s", err)
 		}
 	}()
-	port := configs.GetWebApiPort()
-	log.Printf("web api running on port: %s", port)
-	appState := core.NewAppState(dbConn, fmt.Sprintf(":%s", configs.GetGrpcPort()))
-	api.Run(fmt.Sprintf(":%s", port), appState)
-}
-
-func runGrpcServer() {
-	port := configs.GetGrpcPort()
-	server := rpc.NewShopServer()
-	log.Printf("grpc server running on port: %s", port)
-	server.Run(fmt.Sprintf(":%s", port))
-}
-
-func main() {
-	if len(os.Args) == 1 || len(os.Args) > 2 {
-		fmt.Printf("You must choice which app to run. See help.\n")
-		help()
-		os.Exit(1)
-	}
+	appState := core.NewAppState(
+		dbConn,
+		fmt.Sprintf(":%s", configs.GetWebApiPort()),
+		fmt.Sprintf(":%s", configs.GetGrpcPort()))
 	switch os.Args[1] {
 	case "-a":
-		runWebApi()
+		runWebApi(&appState)
 	case "--api":
-		runWebApi()
+		runWebApi(&appState)
 	case "-g":
-		runGrpcServer()
+		runGrpcServer(&appState)
 	case "--grpc":
-		runGrpcServer()
+		runGrpcServer(&appState)
 	case "-h":
 		help()
 	case "--help":
