@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
+
 	"github.com/a-korkin/shop/configs"
 	"github.com/a-korkin/shop/internal/adapters"
 	"github.com/a-korkin/shop/internal/api"
+	"github.com/a-korkin/shop/internal/core"
 	"github.com/a-korkin/shop/internal/rpc"
-	"log"
-	"os"
 )
 
 func help() {
@@ -28,14 +30,17 @@ func runWebApi() {
 			log.Fatalf("failed to close connection to db: %s", err)
 		}
 	}()
-	apiPort := configs.GetWebApiPort()
-	api.Run(fmt.Sprintf(":%s", apiPort), dbConn)
+	port := configs.GetWebApiPort()
+	log.Printf("web api running on port: %s", port)
+	appState := core.NewAppState(dbConn, fmt.Sprintf(":%s", configs.GetGrpcPort()))
+	api.Run(fmt.Sprintf(":%s", port), appState)
 }
 
 func runGrpcServer() {
-	grpcPort := configs.GetGrpcPort()
+	port := configs.GetGrpcPort()
 	server := rpc.NewShopServer()
-	server.Run(fmt.Sprintf(":%s", grpcPort))
+	log.Printf("grpc server running on port: %s", port)
+	server.Run(fmt.Sprintf(":%s", port))
 }
 
 func main() {

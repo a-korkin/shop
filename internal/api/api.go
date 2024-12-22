@@ -8,18 +8,20 @@ import (
 
 	"context"
 	pb "github.com/a-korkin/shop/internal/common"
+	"github.com/a-korkin/shop/internal/core"
 	"github.com/a-korkin/shop/internal/ports"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 type ShopHandler struct {
-	Db ports.DbConnect
+	Db       ports.DbConnect
+	GrpcPort string
 }
 
-func callGrpc() (*pb.Item, error) {
+func callGrpc(port string) (*pb.Item, error) {
 	conn, err := grpc.NewClient(
-		"localhost:8000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+		port, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed to create grpc client: %s", err)
 	}
@@ -42,7 +44,7 @@ func (h *ShopHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch resource {
 	case "items":
 		// item, err := h.Db.GetItem(1)
-		item, err := callGrpc()
+		item, err := callGrpc(h.GrpcPort)
 		if err != nil {
 			log.Fatalf("failed to get item: %s", err)
 		}
@@ -54,12 +56,13 @@ func (h *ShopHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Run(port string, dbConn ports.DbConnect) {
+func Run(port string, appState *core.AppState) {
 	server := http.Server{
 		Addr: port,
 	}
 	handler := ShopHandler{
-		Db: dbConn,
+		Db:       appState.DbConn,
+		GrpcPort: appState.GrpcPort,
 	}
 	http.Handle("/", &handler)
 	if err := server.ListenAndServe(); err != nil {
