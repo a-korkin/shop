@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package common;
+
+option go_package = "github.com/a-korkin/shop/common";
+
+message ItemId {
+    int32 id = 1;
+}
+message Item {
+    int32 id = 1;
+    string title = 2;
+    float price = 3;
+}
+
+service ShopService {
+    rpc GetItem(ItemId) returns (Item);
+}
