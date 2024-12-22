@@ -21,7 +21,7 @@ func (s *ShopServer) GetItem(ctx context.Context, in *pb.ItemId) (*pb.Item, erro
 	item := pb.Item{
 		Id:    1,
 		Title: "Item #1",
-		Price: 779.23,
+		Price: 779.33,
 	}
 	return &item, nil
 }
