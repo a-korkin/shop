@@ -15,7 +15,6 @@ import (
 
 type ShopHandler struct {
 	Db         ports.DbConnect
-	GrpcPort   string
 	GrpcClient pb.ShopServiceClient
 }
 
@@ -56,7 +55,6 @@ func Run(appState *core.AppState) {
 	}
 	handler := ShopHandler{
 		Db:         appState.DbConn,
-		GrpcPort:   appState.GrpcPort,
 		GrpcClient: grpcClient,
 	}
 	http.Handle("/", &handler)

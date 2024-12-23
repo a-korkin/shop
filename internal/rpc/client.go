@@ -12,10 +12,5 @@ func NewGrpcClient(addr string) (pb.ShopServiceClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	// defer func() {
-	// 	if err := conn.Close(); err != nil {
-	// 		log.Fatalf("failed to close grpc client connection: %s", err)
-	// 	}
-	// }()
 	return pb.NewShopServiceClient(conn), err
 }
