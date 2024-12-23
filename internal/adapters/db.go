@@ -56,3 +56,23 @@ func (dbConn *DbConnect) CreateItem(in *pb.ItemDto) (*pb.Item, error) {
 
 	return nil, nil
 }
+
+func (dbConn *DbConnect) GetItems(in *pb.PageParams) (*pb.ItemList, error) {
+	rows, err := dbConn.Db.Query(`
+select id, title, price
+from public.items
+offset $1
+limit $2`, in.Offset, in.Limit)
+	if err != nil {
+		return nil, err
+	}
+	list := make([]*pb.Item, 0)
+	for rows.Next() {
+		item := pb.Item{}
+		if err := rows.Scan(&item.Id, &item.Title, &item.Price); err != nil {
+			return nil, err
+		}
+		list = append(list, &item)
+	}
+	return &pb.ItemList{Items: list}, nil
+}
