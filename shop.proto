@@ -34,4 +34,5 @@ service ShopService {
     rpc CreateItem(ItemDto) returns (Item);
     rpc GetItems(PageParams) returns (ItemList);
     rpc DropItem(ItemId) returns (Empty);
+    rpc UpdItem(Item) returns (Item);
 }

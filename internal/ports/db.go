@@ -9,4 +9,5 @@ type DbConnect interface {
 	CreateItem(in *pb.ItemDto) (*pb.Item, error)
 	GetItems(in *pb.PageParams) (*pb.ItemList, error)
 	DropItem(in *pb.ItemId) (*pb.Empty, error)
+	UpdItem(in *pb.Item) (*pb.Item, error)
 }

@@ -84,3 +84,17 @@ func (dbConn *DbConnect) DropItem(in *pb.ItemId) (*pb.Empty, error) {
 	}
 	return &pb.Empty{}, nil
 }
+func (dbConn *DbConnect) UpdItem(in *pb.Item) (*pb.Item, error) {
+	rows, err := dbConn.Db.Query(`
+update public.items
+set title = $1,
+	price = $2
+where id = $3`, in.Title, in.Price, in.Id)
+	if err != nil {
+		return nil, err
+	}
+	if rows.Next() {
+		return in, nil
+	}
+	return nil, nil
+}

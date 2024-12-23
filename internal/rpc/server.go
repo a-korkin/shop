@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"context"
-	"log"
 	"net"
 
 	pb "github.com/a-korkin/shop/internal/common"
@@ -29,22 +28,29 @@ func (s *ShopServer) GetItem(ctx context.Context, in *pb.ItemId) (*pb.Item, erro
 func (s *ShopServer) CreateItem(ctx context.Context, in *pb.ItemDto) (*pb.Item, error) {
 	return s.AppState.DbConn.CreateItem(in)
 }
+
 func (s *ShopServer) GetItems(ctx context.Context, in *pb.PageParams) (*pb.ItemList, error) {
 	return s.AppState.DbConn.GetItems(in)
 }
+
 func (s *ShopServer) DropItem(ctx context.Context, in *pb.ItemId) (*pb.Empty, error) {
 	return s.AppState.DbConn.DropItem(in)
 }
 
-func (srv *ShopServer) Run(port string) {
+func (s *ShopServer) UpdItem(ctx context.Context, in *pb.Item) (*pb.Item, error) {
+	return s.AppState.DbConn.UpdItem(in)
+}
+
+func (srv *ShopServer) Run(port string) error {
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
-		log.Fatalf("failed to create listener: %s", err)
+		return err
 	}
 	s := grpc.NewServer()
 	pb.RegisterShopServiceServer(s, srv)
 	reflection.Register(s)
 	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to run grpc server: %s", err)
+		return err
 	}
+	return nil
 }

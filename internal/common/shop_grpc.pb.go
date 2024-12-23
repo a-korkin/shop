@@ -23,6 +23,7 @@ const (
 	ShopService_CreateItem_FullMethodName = "/ShopService/CreateItem"
 	ShopService_GetItems_FullMethodName   = "/ShopService/GetItems"
 	ShopService_DropItem_FullMethodName   = "/ShopService/DropItem"
+	ShopService_UpdItem_FullMethodName    = "/ShopService/UpdItem"
 )
 
 // ShopServiceClient is the client API for ShopService service.
@@ -33,6 +34,7 @@ type ShopServiceClient interface {
 	CreateItem(ctx context.Context, in *ItemDto, opts ...grpc.CallOption) (*Item, error)
 	GetItems(ctx context.Context, in *PageParams, opts ...grpc.CallOption) (*ItemList, error)
 	DropItem(ctx context.Context, in *ItemId, opts ...grpc.CallOption) (*Empty, error)
+	UpdItem(ctx context.Context, in *Item, opts ...grpc.CallOption) (*Item, error)
 }
 
 type shopServiceClient struct {
@@ -83,6 +85,16 @@ func (c *shopServiceClient) DropItem(ctx context.Context, in *ItemId, opts ...gr
 	return out, nil
 }
 
+func (c *shopServiceClient) UpdItem(ctx context.Context, in *Item, opts ...grpc.CallOption) (*Item, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Item)
+	err := c.cc.Invoke(ctx, ShopService_UpdItem_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ShopServiceServer is the server API for ShopService service.
 // All implementations must embed UnimplementedShopServiceServer
 // for forward compatibility.
@@ -91,6 +103,7 @@ type ShopServiceServer interface {
 	CreateItem(context.Context, *ItemDto) (*Item, error)
 	GetItems(context.Context, *PageParams) (*ItemList, error)
 	DropItem(context.Context, *ItemId) (*Empty, error)
+	UpdItem(context.Context, *Item) (*Item, error)
 	mustEmbedUnimplementedShopServiceServer()
 }
 
@@ -112,6 +125,9 @@ func (UnimplementedShopServiceServer) GetItems(context.Context, *PageParams) (*I
 }
 func (UnimplementedShopServiceServer) DropItem(context.Context, *ItemId) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DropItem not implemented")
+}
+func (UnimplementedShopServiceServer) UpdItem(context.Context, *Item) (*Item, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdItem not implemented")
 }
 func (UnimplementedShopServiceServer) mustEmbedUnimplementedShopServiceServer() {}
 func (UnimplementedShopServiceServer) testEmbeddedByValue()                     {}
@@ -206,6 +222,24 @@ func _ShopService_DropItem_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ShopService_UpdItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Item)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ShopServiceServer).UpdItem(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ShopService_UpdItem_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ShopServiceServer).UpdItem(ctx, req.(*Item))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ShopService_ServiceDesc is the grpc.ServiceDesc for ShopService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -228,6 +262,10 @@ var ShopService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DropItem",
 			Handler:    _ShopService_DropItem_Handler,
+		},
+		{
+			MethodName: "UpdItem",
+			Handler:    _ShopService_UpdItem_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

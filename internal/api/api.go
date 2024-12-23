@@ -27,13 +27,13 @@ func (h *ShopHandler) itemsHandler(uri string, w http.ResponseWriter, r *http.Re
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		if id != 0 {
+		if id >= 0 {
 			item, err := h.GrpcClient.GetItem(
 				context.Background(), &pb.ItemId{Id: int32(id)})
 			if err != nil {
 				log.Fatalf("failed to get item: %s", err)
 			}
-			if item.Id == 0 {
+			if item.Id <= 0 {
 				http.Error(w, "item not found", http.StatusNotFound)
 				return
 			}
@@ -66,13 +66,40 @@ func (h *ShopHandler) itemsHandler(uri string, w http.ResponseWriter, r *http.Re
 		w.WriteHeader(http.StatusCreated)
 		encoder := json.NewEncoder(w)
 		encoder.Encode(&item)
+	case "PUT":
+		id, err := tools.GetId(uri)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if id <= 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		decoder := json.NewDecoder(r.Body)
+		in := pb.ItemDto{}
+		if err := decoder.Decode(&in); err != nil {
+			log.Fatalf("failed to update item: %s", err)
+		}
+		item := pb.Item{
+			Id:    int32(id),
+			Title: in.Title,
+			Price: in.Price,
+		}
+		_, err = h.GrpcClient.UpdItem(context.Background(), &item)
+		if err != nil {
+			log.Fatalf("failed to update item: %s", err)
+		}
+		w.WriteHeader(http.StatusOK)
+		encoder := json.NewEncoder(w)
+		encoder.Encode(&item)
 	case "DELETE":
 		id, err := tools.GetId(uri)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		if id == 0 {
+		if id <= 0 {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -94,13 +121,13 @@ func (h *ShopHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Run(appState *core.AppState) {
+func Run(appState *core.AppState) error {
 	server := http.Server{
 		Addr: appState.ApiPort,
 	}
 	grpcClient, err := rpc.NewGrpcClient(appState.GrpcPort)
 	if err != nil {
-		log.Fatalf("failed to create client: %s", err)
+		return err
 	}
 	handler := ShopHandler{
 		Db:         appState.DbConn,
@@ -108,7 +135,8 @@ func Run(appState *core.AppState) {
 	}
 	http.Handle("/", &handler)
 	if err := server.ListenAndServe(); err != nil {
-		log.Fatalf("failed to start web api: %s", err)
+		return err
 	}
 	defer server.Close()
+	return nil
 }

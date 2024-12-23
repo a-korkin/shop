@@ -21,14 +21,18 @@ func help() {
 }
 
 func runWebApi(appState *core.AppState) {
-    log.Printf("web api running on port: %s", appState.ApiPort)
-	api.Run(appState)
+	log.Printf("web api running on port: %s", appState.ApiPort)
+	if err := api.Run(appState); err != nil {
+		log.Printf("failed to run api server: %s", err)
+	}
 }
 
 func runGrpcServer(appState *core.AppState) {
 	server := rpc.NewShopServer(appState)
 	log.Printf("grpc server running on port: %s", appState.GrpcPort)
-	server.Run(appState.GrpcPort)
+	if err := server.Run(appState.GrpcPort); err != nil {
+		log.Printf("failed to run grpc server: %s", err)
+	}
 }
 
 func main() {

@@ -36,7 +36,7 @@ func GetResource(uri string) string {
 func GetId(uri string) (int, error) {
 	tokens := getTokens(uri)
 	if len(tokens) < 3 {
-		return 0, nil
+		return -1, nil
 	}
 	return strconv.Atoi(tokens[2])
 }
