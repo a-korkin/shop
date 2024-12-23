@@ -26,6 +26,10 @@ func (s *ShopServer) GetItem(ctx context.Context, in *pb.ItemId) (*pb.Item, erro
 	return s.AppState.DbConn.GetItem(in.Id)
 }
 
+func (s *ShopServer) CreateItem(ctx context.Context, in *pb.ItemDto) (*pb.Item, error) {
+	return s.AppState.DbConn.CreateItem(in)
+}
+
 func (srv *ShopServer) Run(port string) {
 	lis, err := net.Listen("tcp", port)
 	if err != nil {

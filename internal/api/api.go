@@ -18,12 +18,10 @@ type ShopHandler struct {
 	GrpcClient pb.ShopServiceClient
 }
 
-func (h *ShopHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	resource := tools.GetResource(r.RequestURI)
-
-	switch resource {
-	case "items":
-		id, err := tools.GetId(r.RequestURI)
+func (h *ShopHandler) itemsHandler(uri string, w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		id, err := tools.GetId(uri)
 		if err == nil {
 			item, err := h.GrpcClient.GetItem(
 				context.Background(), &pb.ItemId{Id: int32(id)})
@@ -40,6 +38,27 @@ func (h *ShopHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				log.Fatalf("failed to encode item: %s", err)
 			}
 		}
+	case "POST":
+		decoder := json.NewDecoder(r.Body)
+		in := pb.ItemDto{}
+		if err := decoder.Decode(&in); err != nil {
+			log.Fatalf("failed to unmarshalling item: %s", err)
+		}
+		item, err := h.GrpcClient.CreateItem(context.Background(), &in)
+		if err != nil {
+			log.Fatalf("failed to create item: %s", err)
+		}
+		w.WriteHeader(http.StatusCreated)
+		encoder := json.NewEncoder(w)
+		encoder.Encode(&item)
+	}
+}
+
+func (h *ShopHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	resource := tools.GetResource(r.RequestURI)
+	switch resource {
+	case "items":
+		h.itemsHandler(r.RequestURI, w, r)
 	default:
 		http.Error(w, "resource not found", http.StatusNotFound)
 	}

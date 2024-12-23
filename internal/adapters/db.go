@@ -36,3 +36,23 @@ func (dbConn *DbConnect) GetItem(id int32) (*pb.Item, error) {
 	}
 	return nil, nil
 }
+func (dbConn *DbConnect) CreateItem(in *pb.ItemDto) (*pb.Item, error) {
+	rows, err := dbConn.Db.Query(
+		"insert into public.items(title, price) values($1, $2) returning id",
+		in.Title, in.Price)
+	if err != nil {
+		return nil, err
+	}
+	if rows.Next() {
+		item := pb.Item{
+			Title: in.Title,
+			Price: in.Price,
+		}
+		if err := rows.Scan(&item.Id); err != nil {
+			return nil, err
+		}
+		return &item, nil
+	}
+
+	return nil, nil
+}

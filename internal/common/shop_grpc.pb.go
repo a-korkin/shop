@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ShopService_GetItem_FullMethodName = "/ShopService/GetItem"
+	ShopService_GetItem_FullMethodName    = "/ShopService/GetItem"
+	ShopService_CreateItem_FullMethodName = "/ShopService/CreateItem"
 )
 
 // ShopServiceClient is the client API for ShopService service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ShopServiceClient interface {
 	GetItem(ctx context.Context, in *ItemId, opts ...grpc.CallOption) (*Item, error)
+	CreateItem(ctx context.Context, in *ItemDto, opts ...grpc.CallOption) (*Item, error)
 }
 
 type shopServiceClient struct {
@@ -47,11 +49,22 @@ func (c *shopServiceClient) GetItem(ctx context.Context, in *ItemId, opts ...grp
 	return out, nil
 }
 
+func (c *shopServiceClient) CreateItem(ctx context.Context, in *ItemDto, opts ...grpc.CallOption) (*Item, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Item)
+	err := c.cc.Invoke(ctx, ShopService_CreateItem_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ShopServiceServer is the server API for ShopService service.
 // All implementations must embed UnimplementedShopServiceServer
 // for forward compatibility.
 type ShopServiceServer interface {
 	GetItem(context.Context, *ItemId) (*Item, error)
+	CreateItem(context.Context, *ItemDto) (*Item, error)
 	mustEmbedUnimplementedShopServiceServer()
 }
 
@@ -64,6 +77,9 @@ type UnimplementedShopServiceServer struct{}
 
 func (UnimplementedShopServiceServer) GetItem(context.Context, *ItemId) (*Item, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetItem not implemented")
+}
+func (UnimplementedShopServiceServer) CreateItem(context.Context, *ItemDto) (*Item, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateItem not implemented")
 }
 func (UnimplementedShopServiceServer) mustEmbedUnimplementedShopServiceServer() {}
 func (UnimplementedShopServiceServer) testEmbeddedByValue()                     {}
@@ -104,6 +120,24 @@ func _ShopService_GetItem_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ShopService_CreateItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ItemDto)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ShopServiceServer).CreateItem(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ShopService_CreateItem_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ShopServiceServer).CreateItem(ctx, req.(*ItemDto))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ShopService_ServiceDesc is the grpc.ServiceDesc for ShopService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +148,10 @@ var ShopService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetItem",
 			Handler:    _ShopService_GetItem_Handler,
+		},
+		{
+			MethodName: "CreateItem",
+			Handler:    _ShopService_CreateItem_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
