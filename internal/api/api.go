@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"strconv"
 
 	"context"
 
@@ -18,14 +17,6 @@ import (
 type ShopHandler struct {
 	Db         ports.DbConnect
 	GrpcClient pb.ShopServiceClient
-}
-
-func NewPageParams() *pb.PageParams {
-	return &pb.PageParams{
-		Page:   1,
-		Limit:  20,
-		Offset: 0,
-	}
 }
 
 func (h *ShopHandler) itemsHandler(uri string, w http.ResponseWriter, r *http.Request) {
@@ -52,25 +43,7 @@ func (h *ShopHandler) itemsHandler(uri string, w http.ResponseWriter, r *http.Re
 				log.Fatalf("failed to encode item: %s", err)
 			}
 		} else {
-			pageParams := NewPageParams()
-			if r.URL.RawQuery != "" {
-				queryParams := tools.GetParams(r.URL.RawQuery)
-				if p, ok := queryParams["page"]; ok {
-					if page, err := strconv.Atoi(p); err == nil {
-						pageParams.Page = int32(page)
-					}
-				}
-				if l, ok := queryParams["limit"]; ok {
-					if limit, err := strconv.Atoi(l); err == nil {
-						pageParams.Limit = int32(limit)
-					}
-				}
-				if o, ok := queryParams["offset"]; ok {
-					if offset, err := strconv.Atoi(o); err == nil {
-						pageParams.Offset = int32(offset)
-					}
-				}
-			}
+			pageParams := tools.GetPageParams(r.URL.RawQuery)
 			items, err := h.GrpcClient.GetItems(context.Background(), pageParams)
 			if err != nil {
 				log.Fatalf("failed to get items: %s", err)
