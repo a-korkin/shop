@@ -66,6 +66,21 @@ func (h *ShopHandler) itemsHandler(uri string, w http.ResponseWriter, r *http.Re
 		w.WriteHeader(http.StatusCreated)
 		encoder := json.NewEncoder(w)
 		encoder.Encode(&item)
+	case "DELETE":
+		id, err := tools.GetId(uri)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if id == 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		_, err = h.GrpcClient.DropItem(context.Background(), &pb.ItemId{Id: int32(id)})
+		if err != nil {
+			log.Fatalf("failed to delete item: %s", err)
+		}
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
 

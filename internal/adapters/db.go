@@ -76,3 +76,11 @@ limit $2`, in.Offset, in.Limit)
 	}
 	return &pb.ItemList{Items: list}, nil
 }
+
+func (dbConn *DbConnect) DropItem(in *pb.ItemId) (*pb.Empty, error) {
+	_, err := dbConn.Db.Exec("delete from public.items where id = $1", in.Id)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.Empty{}, nil
+}

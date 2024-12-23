@@ -27,8 +27,11 @@ message PageParams {
     int32 offset = 3;
 }
 
+message Empty {}
+
 service ShopService {
     rpc GetItem(ItemId) returns (Item);
     rpc CreateItem(ItemDto) returns (Item);
     rpc GetItems(PageParams) returns (ItemList);
+    rpc DropItem(ItemId) returns (Empty);
 }
