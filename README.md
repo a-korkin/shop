@@ -1,1 +1,2 @@
-# Shop application with REST-webapi as public interface and gRPC as internals services
+# Shop application 
+### with REST-webapi as public interface and gRPC as internals services

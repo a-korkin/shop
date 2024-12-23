@@ -21,7 +21,7 @@ func help() {
 }
 
 func runWebApi(appState *core.AppState) {
-	log.Printf("web api running on port: %s", appState.ApiPort)
+    log.Printf("web api running on port: %s", appState.ApiPort)
 	api.Run(appState)
 }
 

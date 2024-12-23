@@ -6,3 +6,5 @@ proto:
 	protoc --go_out=./internal/common --go_opt=paths=source_relative \
 		--go-grpc_out=./internal/common --go-grpc_opt=paths=source_relative \
 		shop.proto
+migrate_up:
+	goose -dir ./migrations up
