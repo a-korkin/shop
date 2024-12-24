@@ -23,23 +23,26 @@ func NewDBConnect(connectionStr string) (*DbConnect, error) {
 
 func (dbConn *DbConnect) GetItem(id int32) (*pb.Item, error) {
 	rows, err := dbConn.Db.Query(
-		"select id, title, price from public.items where id = $1", id)
+		"select id, title, price, category from public.items where id = $1", id)
 	if err != nil {
 		return nil, err
 	}
 	if rows.Next() {
 		item := pb.Item{}
-		if err := rows.Scan(&item.Id, &item.Title, &item.Price); err != nil {
+		if err := rows.Scan(&item.Id, &item.Title, &item.Price, &item.Category); err != nil {
 			return nil, err
 		}
 		return &item, nil
 	}
 	return nil, nil
 }
+
 func (dbConn *DbConnect) CreateItem(in *pb.ItemDto) (*pb.Item, error) {
 	rows, err := dbConn.Db.Query(
-		"insert into public.items(title, price) values($1, $2) returning id",
-		in.Title, in.Price)
+		`
+insert into public.items(title, price, category) 
+values($1, $2, $3) 
+returning id`, in.Title, in.Price, in.Category)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +62,7 @@ func (dbConn *DbConnect) CreateItem(in *pb.ItemDto) (*pb.Item, error) {
 
 func (dbConn *DbConnect) GetItems(in *pb.PageParams) (*pb.ItemList, error) {
 	rows, err := dbConn.Db.Query(`
-select id, title, price
+select id, title, price, category
 from public.items
 offset $1
 limit $2`, in.Offset, in.Limit)
@@ -69,7 +72,8 @@ limit $2`, in.Offset, in.Limit)
 	list := make([]*pb.Item, 0)
 	for rows.Next() {
 		item := pb.Item{}
-		if err := rows.Scan(&item.Id, &item.Title, &item.Price); err != nil {
+		err := rows.Scan(&item.Id, &item.Title, &item.Price, &item.Category)
+		if err != nil {
 			return nil, err
 		}
 		list = append(list, &item)
@@ -84,12 +88,14 @@ func (dbConn *DbConnect) DropItem(in *pb.ItemId) (*pb.Empty, error) {
 	}
 	return &pb.Empty{}, nil
 }
+
 func (dbConn *DbConnect) UpdItem(in *pb.Item) (*pb.Item, error) {
 	rows, err := dbConn.Db.Query(`
 update public.items
-set title = $1,
-	price = $2
-where id = $3`, in.Title, in.Price, in.Id)
+set title = $2,
+	price = $3
+	category = $4
+where id = $1`, in.Id, in.Title, in.Price, in.Category)
 	if err != nil {
 		return nil, err
 	}
