@@ -116,6 +116,29 @@ func (h *ShopHandler) itemsHandler(uri string, w http.ResponseWriter, r *http.Re
 
 func (h *ShopHandler) usersHandler(uri string, w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
+	case "GET":
+		id, err := tools.GetId(uri)
+		if err != nil {
+			log.Fatalf("failed to parse id: %s", err)
+		}
+		if id < 0 {
+			pageParams := tools.GetPageParams(r.URL.RawQuery)
+			userStream, err := h.GrpcClient.GetUsers(context.Background(), pageParams)
+			if err != nil {
+				log.Fatalf("failed to get users: %s", err)
+			}
+			users := make([]*pb.User, 0)
+			for {
+				user, err := userStream.Recv()
+				if err != nil {
+					break
+				}
+				users = append(users, user)
+			}
+			if err = json.NewEncoder(w).Encode(users); err != nil {
+				log.Fatalf("failed to marshalling list of users: %s", err)
+			}
+		}
 	case "POST":
 		userIn := pb.UserDto{}
 		err := json.NewDecoder(r.Body).Decode(&userIn)

@@ -2,6 +2,8 @@ package adapters
 
 import (
 	"database/sql"
+	"io"
+
 	pb "github.com/a-korkin/shop/internal/common"
 	_ "github.com/lib/pq"
 	"google.golang.org/grpc"
@@ -145,7 +147,28 @@ func (dbConn *DbConnect) GetUser(in *pb.UserId) (*pb.User, error) {
 	return nil, nil
 }
 
-func (dbConn *DbConnect) GetUsers(*pb.PageParams, grpc.ServerStreamingServer[pb.User]) error {
+func (dbConn *DbConnect) GetUsers(params *pb.PageParams, stream grpc.ServerStreamingServer[pb.User]) error {
+	rows, err := dbConn.Db.Query(`
+select id, last_name, first_name
+from public.users
+offset $1
+limit $2`, params.Offset, params.Limit)
+	if err != nil {
+		return err
+	}
+	for rows.Next() {
+		user := pb.User{}
+		if err = rows.Scan(&user.Id, &user.LastName, &user.FirstName); err != nil {
+			return err
+		}
+		err = stream.Send(&user)
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return err
+		}
+	}
 	return nil
 }
 
