@@ -138,6 +138,15 @@ func (h *ShopHandler) usersHandler(uri string, w http.ResponseWriter, r *http.Re
 			if err = json.NewEncoder(w).Encode(users); err != nil {
 				log.Fatalf("failed to marshalling list of users: %s", err)
 			}
+		} else {
+			user, err := h.GrpcClient.GetUser(
+				context.Background(), &pb.UserId{Id: int32(id)})
+			if err != nil {
+				log.Fatalf("failed to get user: %s", err)
+			}
+			if err = json.NewEncoder(w).Encode(&user); err != nil {
+				log.Fatalf("failed to marshalling user: %s", err)
+			}
 		}
 	case "POST":
 		userIn := pb.UserDto{}

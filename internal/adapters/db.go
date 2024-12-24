@@ -144,7 +144,20 @@ returning last_name, first_name`, in.Id, in.LastName, in.FirstName)
 }
 
 func (dbConn *DbConnect) GetUser(in *pb.UserId) (*pb.User, error) {
-	return nil, nil
+	rows, err := dbConn.Db.Query(`
+select last_name, first_name
+from public.users
+where id = $1`, in.Id)
+	if err != nil {
+		return nil, err
+	}
+	user := pb.User{}
+	if rows.Next() {
+		if err = rows.Scan(&user.LastName, &user.FirstName); err != nil {
+			return nil, err
+		}
+	}
+	return &user, nil
 }
 
 func (dbConn *DbConnect) GetUsers(params *pb.PageParams, stream grpc.ServerStreamingServer[pb.User]) error {
