@@ -46,19 +46,19 @@ func (s *ShopServer) CreateUser(ctx context.Context, in *pb.UserDto) (*pb.User, 
 }
 
 func (s *ShopServer) UpdUser(ctx context.Context, in *pb.User) (*pb.User, error) {
-	return nil, nil
+	return s.AppState.DbConn.UpdUser(in)
 }
 
 func (s *ShopServer) GetUser(ctx context.Context, in *pb.UserId) (*pb.User, error) {
-	return nil, nil
+	return s.AppState.DbConn.GetUser(in)
 }
 
-func (s *ShopServer) GetUsers(*pb.PageParams, grpc.ServerStreamingServer[pb.User]) error {
-	return nil
+func (s *ShopServer) GetUsers(params *pb.PageParams, stream grpc.ServerStreamingServer[pb.User]) error {
+	return s.AppState.DbConn.GetUsers(params, stream)
 }
 
 func (s *ShopServer) DropUser(ctx context.Context, in *pb.UserId) (*pb.Empty, error) {
-	return nil, nil
+	return s.AppState.DbConn.DropUser(in)
 }
 
 func (srv *ShopServer) Run(port string) error {

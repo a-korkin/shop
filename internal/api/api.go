@@ -108,6 +108,9 @@ func (h *ShopHandler) itemsHandler(uri string, w http.ResponseWriter, r *http.Re
 			log.Fatalf("failed to delete item: %s", err)
 		}
 		w.WriteHeader(http.StatusNoContent)
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
 	}
 }
 
@@ -117,13 +120,53 @@ func (h *ShopHandler) usersHandler(uri string, w http.ResponseWriter, r *http.Re
 		userIn := pb.UserDto{}
 		err := json.NewDecoder(r.Body).Decode(&userIn)
 		if err != nil {
-			log.Fatalf("failed to create user: %s", err)
+			log.Fatalf("failed to unmarshalling user: %s", err)
 		}
 		userOut, err := h.GrpcClient.CreateUser(context.Background(), &userIn)
 		if err != nil {
 			log.Fatalf("failed to creating user: %s", err)
 		}
-		json.NewEncoder(w).Encode(userOut)
+		if err := json.NewEncoder(w).Encode(userOut); err != nil {
+			log.Fatalf("failed to marshalling user: %s", err)
+		}
+	case "PUT":
+		id, err := tools.GetId(uri)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		userIn := pb.UserDto{}
+		err = json.NewDecoder(r.Body).Decode(&userIn)
+		if err != nil {
+			log.Fatalf("failed to unmarshalling user: %s", err)
+		}
+		user := pb.User{
+			Id:        int32(id),
+			LastName:  userIn.LastName,
+			FirstName: userIn.FirstName,
+		}
+		log.Printf("user: %v", &user)
+		userOut, err := h.GrpcClient.UpdUser(context.Background(), &user)
+		if err != nil {
+			log.Fatalf("failed to update user: %s", err)
+		}
+		if err = json.NewEncoder(w).Encode(&userOut); err != nil {
+			log.Fatalf("failed to marshalling user: %s", err)
+		}
+	case "DELETE":
+		id, err := tools.GetId(uri)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		_, err = h.GrpcClient.DropUser(context.Background(), &pb.UserId{Id: int32(id)})
+		if err != nil {
+			log.Fatalf("failed to delete user: %s", err)
+		}
+		w.WriteHeader(http.StatusNoContent)
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
 	}
 }
 

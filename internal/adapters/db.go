@@ -124,7 +124,21 @@ values ($1, $2) returning id, last_name, first_name`, in.LastName, in.FirstName)
 }
 
 func (dbConn *DbConnect) UpdUser(in *pb.User) (*pb.User, error) {
-	return nil, nil
+	rows, err := dbConn.Db.Query(`
+update public.users
+set last_name = $2,
+	first_name = $3
+where id = $1
+returning last_name, first_name`, in.Id, in.LastName, in.FirstName)
+	if err != nil {
+		return nil, err
+	}
+	if rows.Next() {
+		if err := rows.Scan(&in.LastName, &in.FirstName); err != nil {
+			return nil, err
+		}
+	}
+	return in, nil
 }
 
 func (dbConn *DbConnect) GetUser(in *pb.UserId) (*pb.User, error) {
@@ -136,5 +150,9 @@ func (dbConn *DbConnect) GetUsers(*pb.PageParams, grpc.ServerStreamingServer[pb.
 }
 
 func (dbConn *DbConnect) DropUser(in *pb.UserId) (*pb.Empty, error) {
-	return nil, nil
+	_, err := dbConn.Db.Exec("delete from public.users where id = $1", in.Id)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.Empty{}, nil
 }
