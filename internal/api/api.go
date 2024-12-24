@@ -111,11 +111,29 @@ func (h *ShopHandler) itemsHandler(uri string, w http.ResponseWriter, r *http.Re
 	}
 }
 
+func (h *ShopHandler) usersHandler(uri string, w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "POST":
+		userIn := pb.UserDto{}
+		err := json.NewDecoder(r.Body).Decode(&userIn)
+		if err != nil {
+			log.Fatalf("failed to create user: %s", err)
+		}
+		userOut, err := h.GrpcClient.CreateUser(context.Background(), &userIn)
+		if err != nil {
+			log.Fatalf("failed to creating user: %s", err)
+		}
+		json.NewEncoder(w).Encode(userOut)
+	}
+}
+
 func (h *ShopHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	resource := tools.GetResource(r.RequestURI)
 	switch resource {
 	case "items":
 		h.itemsHandler(r.RequestURI, w, r)
+	case "users":
+		h.usersHandler(r.RequestURI, w, r)
 	default:
 		http.Error(w, "resource not found", http.StatusNotFound)
 	}

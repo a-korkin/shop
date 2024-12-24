@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	pb "github.com/a-korkin/shop/internal/common"
 	_ "github.com/lib/pq"
+	"google.golang.org/grpc"
 )
 
 type DbConnect struct {
@@ -102,5 +103,38 @@ where id = $1`, in.Id, in.Title, in.Price, in.Category)
 	if rows.Next() {
 		return in, nil
 	}
+	return nil, nil
+}
+
+func (dbConn *DbConnect) CreateUser(in *pb.UserDto) (*pb.User, error) {
+	rows, err := dbConn.Db.Query(
+		`
+insert into public.users(last_name, first_name) 
+values ($1, $2) returning id, last_name, first_name`, in.LastName, in.FirstName)
+	if err != nil {
+		return nil, err
+	}
+	user := pb.User{}
+	if rows.Next() {
+		if err := rows.Scan(&user.Id, &user.LastName, &user.FirstName); err != nil {
+			return nil, err
+		}
+	}
+	return &user, nil
+}
+
+func (dbConn *DbConnect) UpdUser(in *pb.User) (*pb.User, error) {
+	return nil, nil
+}
+
+func (dbConn *DbConnect) GetUser(in *pb.UserId) (*pb.User, error) {
+	return nil, nil
+}
+
+func (dbConn *DbConnect) GetUsers(*pb.PageParams, grpc.ServerStreamingServer[pb.User]) error {
+	return nil
+}
+
+func (dbConn *DbConnect) DropUser(in *pb.UserId) (*pb.Empty, error) {
 	return nil, nil
 }

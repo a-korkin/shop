@@ -41,13 +41,34 @@ func (s *ShopServer) UpdItem(ctx context.Context, in *pb.Item) (*pb.Item, error)
 	return s.AppState.DbConn.UpdItem(in)
 }
 
+func (s *ShopServer) CreateUser(ctx context.Context, in *pb.UserDto) (*pb.User, error) {
+	return s.AppState.DbConn.CreateUser(in)
+}
+
+func (s *ShopServer) UpdUser(ctx context.Context, in *pb.User) (*pb.User, error) {
+	return nil, nil
+}
+
+func (s *ShopServer) GetUser(ctx context.Context, in *pb.UserId) (*pb.User, error) {
+	return nil, nil
+}
+
+func (s *ShopServer) GetUsers(*pb.PageParams, grpc.ServerStreamingServer[pb.User]) error {
+	return nil
+}
+
+func (s *ShopServer) DropUser(ctx context.Context, in *pb.UserId) (*pb.Empty, error) {
+	return nil, nil
+}
+
 func (srv *ShopServer) Run(port string) error {
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
 		return err
 	}
 	s := grpc.NewServer()
-	pb.RegisterShopServiceServer(s, srv)
+	pb.RegisterShopServiceServer(s,
+		srv)
 	reflection.Register(s)
 	if err := s.Serve(lis); err != nil {
 		return err

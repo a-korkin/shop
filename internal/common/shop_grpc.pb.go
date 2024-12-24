@@ -24,6 +24,11 @@ const (
 	ShopService_GetItems_FullMethodName   = "/ShopService/GetItems"
 	ShopService_DropItem_FullMethodName   = "/ShopService/DropItem"
 	ShopService_UpdItem_FullMethodName    = "/ShopService/UpdItem"
+	ShopService_CreateUser_FullMethodName = "/ShopService/CreateUser"
+	ShopService_UpdUser_FullMethodName    = "/ShopService/UpdUser"
+	ShopService_GetUser_FullMethodName    = "/ShopService/GetUser"
+	ShopService_GetUsers_FullMethodName   = "/ShopService/GetUsers"
+	ShopService_DropUser_FullMethodName   = "/ShopService/DropUser"
 )
 
 // ShopServiceClient is the client API for ShopService service.
@@ -35,6 +40,11 @@ type ShopServiceClient interface {
 	GetItems(ctx context.Context, in *PageParams, opts ...grpc.CallOption) (*ItemList, error)
 	DropItem(ctx context.Context, in *ItemId, opts ...grpc.CallOption) (*Empty, error)
 	UpdItem(ctx context.Context, in *Item, opts ...grpc.CallOption) (*Item, error)
+	CreateUser(ctx context.Context, in *UserDto, opts ...grpc.CallOption) (*User, error)
+	UpdUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*User, error)
+	GetUser(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*User, error)
+	GetUsers(ctx context.Context, in *PageParams, opts ...grpc.CallOption) (grpc.ServerStreamingClient[User], error)
+	DropUser(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type shopServiceClient struct {
@@ -95,6 +105,65 @@ func (c *shopServiceClient) UpdItem(ctx context.Context, in *Item, opts ...grpc.
 	return out, nil
 }
 
+func (c *shopServiceClient) CreateUser(ctx context.Context, in *UserDto, opts ...grpc.CallOption) (*User, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(User)
+	err := c.cc.Invoke(ctx, ShopService_CreateUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *shopServiceClient) UpdUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*User, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(User)
+	err := c.cc.Invoke(ctx, ShopService_UpdUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *shopServiceClient) GetUser(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*User, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(User)
+	err := c.cc.Invoke(ctx, ShopService_GetUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *shopServiceClient) GetUsers(ctx context.Context, in *PageParams, opts ...grpc.CallOption) (grpc.ServerStreamingClient[User], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &ShopService_ServiceDesc.Streams[0], ShopService_GetUsers_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[PageParams, User]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ShopService_GetUsersClient = grpc.ServerStreamingClient[User]
+
+func (c *shopServiceClient) DropUser(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, ShopService_DropUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ShopServiceServer is the server API for ShopService service.
 // All implementations must embed UnimplementedShopServiceServer
 // for forward compatibility.
@@ -104,6 +173,11 @@ type ShopServiceServer interface {
 	GetItems(context.Context, *PageParams) (*ItemList, error)
 	DropItem(context.Context, *ItemId) (*Empty, error)
 	UpdItem(context.Context, *Item) (*Item, error)
+	CreateUser(context.Context, *UserDto) (*User, error)
+	UpdUser(context.Context, *User) (*User, error)
+	GetUser(context.Context, *UserId) (*User, error)
+	GetUsers(*PageParams, grpc.ServerStreamingServer[User]) error
+	DropUser(context.Context, *UserId) (*Empty, error)
 	mustEmbedUnimplementedShopServiceServer()
 }
 
@@ -128,6 +202,21 @@ func (UnimplementedShopServiceServer) DropItem(context.Context, *ItemId) (*Empty
 }
 func (UnimplementedShopServiceServer) UpdItem(context.Context, *Item) (*Item, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdItem not implemented")
+}
+func (UnimplementedShopServiceServer) CreateUser(context.Context, *UserDto) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
+}
+func (UnimplementedShopServiceServer) UpdUser(context.Context, *User) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdUser not implemented")
+}
+func (UnimplementedShopServiceServer) GetUser(context.Context, *UserId) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
+}
+func (UnimplementedShopServiceServer) GetUsers(*PageParams, grpc.ServerStreamingServer[User]) error {
+	return status.Errorf(codes.Unimplemented, "method GetUsers not implemented")
+}
+func (UnimplementedShopServiceServer) DropUser(context.Context, *UserId) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DropUser not implemented")
 }
 func (UnimplementedShopServiceServer) mustEmbedUnimplementedShopServiceServer() {}
 func (UnimplementedShopServiceServer) testEmbeddedByValue()                     {}
@@ -240,6 +329,89 @@ func _ShopService_UpdItem_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ShopService_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserDto)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ShopServiceServer).CreateUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ShopService_CreateUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ShopServiceServer).CreateUser(ctx, req.(*UserDto))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ShopService_UpdUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(User)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ShopServiceServer).UpdUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ShopService_UpdUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ShopServiceServer).UpdUser(ctx, req.(*User))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ShopService_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ShopServiceServer).GetUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ShopService_GetUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ShopServiceServer).GetUser(ctx, req.(*UserId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ShopService_GetUsers_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(PageParams)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ShopServiceServer).GetUsers(m, &grpc.GenericServerStream[PageParams, User]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ShopService_GetUsersServer = grpc.ServerStreamingServer[User]
+
+func _ShopService_DropUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ShopServiceServer).DropUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ShopService_DropUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ShopServiceServer).DropUser(ctx, req.(*UserId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ShopService_ServiceDesc is the grpc.ServiceDesc for ShopService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -267,7 +439,29 @@ var ShopService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "UpdItem",
 			Handler:    _ShopService_UpdItem_Handler,
 		},
+		{
+			MethodName: "CreateUser",
+			Handler:    _ShopService_CreateUser_Handler,
+		},
+		{
+			MethodName: "UpdUser",
+			Handler:    _ShopService_UpdUser_Handler,
+		},
+		{
+			MethodName: "GetUser",
+			Handler:    _ShopService_GetUser_Handler,
+		},
+		{
+			MethodName: "DropUser",
+			Handler:    _ShopService_DropUser_Handler,
+		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "GetUsers",
+			Handler:       _ShopService_GetUsers_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "shop.proto",
 }
