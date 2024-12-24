@@ -1,4 +1,4 @@
 # Shop application 
 ### with REST-webapi as public interface and gRPC as internals services
 
-[!Alt text](img/schema.jpg)
+[!alt text](https://github.com/a-korkin/shop/blob/main/img/schema.jpg?raw=true)
