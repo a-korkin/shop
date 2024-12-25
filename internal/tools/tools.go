@@ -52,7 +52,7 @@ func GetPageParams(rawQuery string) *pb.PageParams {
 	queryParams := getParams(rawQuery)
 	if p, ok := queryParams["page"]; ok {
 		if page, err := strconv.Atoi(p); err == nil {
-			pageParams.Page = int32(page)
+			pageParams.Page = max(int32(page), 1)
 		}
 	}
 	if l, ok := queryParams["limit"]; ok {
