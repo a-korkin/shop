@@ -70,7 +70,7 @@ func (dbConn *DbConnect) GetItems(in *pb.PageParams) (*pb.ItemList, error) {
 select id, title, price, category
 from public.items
 offset $1
-limit $2`, in.Offset, in.Limit)
+limit $2`, (in.Page-1)*in.Limit, in.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -167,7 +167,7 @@ func (dbConn *DbConnect) GetUsers(params *pb.PageParams, stream grpc.ServerStrea
 select id, last_name, first_name
 from public.users
 offset $1
-limit $2`, params.Offset, params.Limit)
+limit $2`, (params.Page-1)*params.Limit, params.Limit)
 	if err != nil {
 		return err
 	}

@@ -43,9 +43,8 @@ func GetId(uri string) (int, error) {
 
 func GetPageParams(rawQuery string) *pb.PageParams {
 	pageParams := pb.PageParams{
-		Page:   1,
-		Limit:  20,
-		Offset: 0,
+		Page:  1,
+		Limit: 20,
 	}
 	if rawQuery == "" {
 		return &pageParams
@@ -59,11 +58,6 @@ func GetPageParams(rawQuery string) *pb.PageParams {
 	if l, ok := queryParams["limit"]; ok {
 		if limit, err := strconv.Atoi(l); err == nil {
 			pageParams.Limit = int32(limit)
-		}
-	}
-	if o, ok := queryParams["offset"]; ok {
-		if offset, err := strconv.Atoi(o); err == nil {
-			pageParams.Offset = int32(offset)
 		}
 	}
 	return &pageParams
