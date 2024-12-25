@@ -21,9 +21,11 @@ func (h *ShopHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	switch resource {
 	case "items":
-		handlers.ItemHandle(ctx, r.RequestURI, h.GrpcClient, w, r)
+		handlers.ItemHandle(ctx, h.GrpcClient, w, r)
 	case "users":
-		handlers.UserHandle(ctx, r.RequestURI, h.GrpcClient, w, r)
+		handlers.UserHandle(ctx, h.GrpcClient, w, r)
+	case "buy":
+		handlers.BuyHandle(ctx, h.GrpcClient, w, r)
 	default:
 		http.Error(w, "resource not found", http.StatusNotFound)
 	}

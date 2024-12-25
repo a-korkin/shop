@@ -10,11 +10,11 @@ import (
 )
 
 func UserHandle(
-	ctx context.Context, uri string,
-	client pb.ShopServiceClient, w http.ResponseWriter, r *http.Request) {
+	ctx context.Context, client pb.ShopServiceClient,
+	w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		id, err := tools.GetId(uri)
+		id, err := tools.GetId(r.RequestURI)
 		if err != nil {
 			log.Fatalf("failed to parse id: %s", err)
 		}
@@ -58,7 +58,7 @@ func UserHandle(
 			log.Fatalf("failed to marshalling user: %s", err)
 		}
 	case "PUT":
-		id, err := tools.GetId(uri)
+		id, err := tools.GetId(r.RequestURI)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -82,7 +82,7 @@ func UserHandle(
 			log.Fatalf("failed to marshalling user: %s", err)
 		}
 	case "DELETE":
-		id, err := tools.GetId(uri)
+		id, err := tools.GetId(r.RequestURI)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
