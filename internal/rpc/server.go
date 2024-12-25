@@ -60,6 +60,9 @@ func (s *ShopServer) GetUsers(params *pb.PageParams, stream grpc.ServerStreaming
 func (s *ShopServer) DropUser(ctx context.Context, in *pb.UserId) (*pb.Empty, error) {
 	return s.AppState.DbConn.DropUser(in)
 }
+func (s *ShopServer) Buy(ctx context.Context, in *pb.PurchaseDto) (*pb.Purchase, error) {
+	return s.AppState.DbConn.Buy(in)
+}
 
 func (srv *ShopServer) Run(port string) error {
 	lis, err := net.Listen("tcp", port)

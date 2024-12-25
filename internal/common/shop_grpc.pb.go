@@ -29,6 +29,7 @@ const (
 	ShopService_GetUser_FullMethodName    = "/ShopService/GetUser"
 	ShopService_GetUsers_FullMethodName   = "/ShopService/GetUsers"
 	ShopService_DropUser_FullMethodName   = "/ShopService/DropUser"
+	ShopService_Buy_FullMethodName        = "/ShopService/Buy"
 )
 
 // ShopServiceClient is the client API for ShopService service.
@@ -45,6 +46,7 @@ type ShopServiceClient interface {
 	GetUser(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*User, error)
 	GetUsers(ctx context.Context, in *PageParams, opts ...grpc.CallOption) (grpc.ServerStreamingClient[User], error)
 	DropUser(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*Empty, error)
+	Buy(ctx context.Context, in *PurchaseDto, opts ...grpc.CallOption) (*Purchase, error)
 }
 
 type shopServiceClient struct {
@@ -164,6 +166,16 @@ func (c *shopServiceClient) DropUser(ctx context.Context, in *UserId, opts ...gr
 	return out, nil
 }
 
+func (c *shopServiceClient) Buy(ctx context.Context, in *PurchaseDto, opts ...grpc.CallOption) (*Purchase, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Purchase)
+	err := c.cc.Invoke(ctx, ShopService_Buy_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ShopServiceServer is the server API for ShopService service.
 // All implementations must embed UnimplementedShopServiceServer
 // for forward compatibility.
@@ -178,6 +190,7 @@ type ShopServiceServer interface {
 	GetUser(context.Context, *UserId) (*User, error)
 	GetUsers(*PageParams, grpc.ServerStreamingServer[User]) error
 	DropUser(context.Context, *UserId) (*Empty, error)
+	Buy(context.Context, *PurchaseDto) (*Purchase, error)
 	mustEmbedUnimplementedShopServiceServer()
 }
 
@@ -217,6 +230,9 @@ func (UnimplementedShopServiceServer) GetUsers(*PageParams, grpc.ServerStreaming
 }
 func (UnimplementedShopServiceServer) DropUser(context.Context, *UserId) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DropUser not implemented")
+}
+func (UnimplementedShopServiceServer) Buy(context.Context, *PurchaseDto) (*Purchase, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Buy not implemented")
 }
 func (UnimplementedShopServiceServer) mustEmbedUnimplementedShopServiceServer() {}
 func (UnimplementedShopServiceServer) testEmbeddedByValue()                     {}
@@ -412,6 +428,24 @@ func _ShopService_DropUser_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ShopService_Buy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PurchaseDto)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ShopServiceServer).Buy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ShopService_Buy_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ShopServiceServer).Buy(ctx, req.(*PurchaseDto))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ShopService_ServiceDesc is the grpc.ServiceDesc for ShopService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -454,6 +488,10 @@ var ShopService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DropUser",
 			Handler:    _ShopService_DropUser_Handler,
+		},
+		{
+			MethodName: "Buy",
+			Handler:    _ShopService_Buy_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

@@ -192,3 +192,23 @@ func (dbConn *DbConnect) DropUser(in *pb.UserId) (*pb.Empty, error) {
 	}
 	return &pb.Empty{}, nil
 }
+
+func (dbConn *DbConnect) Buy(in *pb.PurchaseDto) (*pb.Purchase, error) {
+	rows, err := dbConn.Db.Query(`
+insert into public.purchases(user_id, item_id, count_items)
+value($1, $2, $3)
+returning id, user_id, item_id, time_of_purchase, count_items
+`, in.UserId, in.ItemId, in.CountItems)
+	if err != nil {
+		return nil, err
+	}
+	out := pb.Purchase{}
+	if rows.Next() {
+		err = rows.Scan(&out.Id, &out.UserId,
+			&out.ItemId, &out.TimeOfPurchase, &out.CountItems)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &out, nil
+}

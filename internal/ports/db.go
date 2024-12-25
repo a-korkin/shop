@@ -17,4 +17,5 @@ type DbConnect interface {
 	GetUser(in *pb.UserId) (*pb.User, error)
 	GetUsers(*pb.PageParams, grpc.ServerStreamingServer[pb.User]) error
 	DropUser(in *pb.UserId) (*pb.Empty, error)
+	Buy(in *pb.PurchaseDto) (*pb.Purchase, error)
 }

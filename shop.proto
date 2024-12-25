@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "google/protobuf/timestamp.proto";
+
 option go_package = "github.com/a-korkin/shop/common";
 
 message ItemId {
@@ -46,6 +48,20 @@ message UserDto {
     string first_name = 2;
 }
 
+message PurchaseDto {
+    int32 user_id = 1;
+    int32 item_id = 2;
+    int32 count_items = 3;
+}
+
+message Purchase {
+    int32 id = 1;
+    int32 user_id = 2;
+    int32 item_id = 3;
+    google.protobuf.Timestamp time_of_purchase = 4;
+    int32 count_items = 5;
+}
+
 service ShopService {
     rpc GetItem(ItemId) returns (Item);
     rpc CreateItem(ItemDto) returns (Item);
@@ -58,4 +74,6 @@ service ShopService {
     rpc GetUser(UserId) returns (User);
     rpc GetUsers(PageParams) returns (stream User);
     rpc DropUser(UserId) returns (Empty);
+
+    rpc Buy(PurchaseDto) returns (Purchase);
 }
